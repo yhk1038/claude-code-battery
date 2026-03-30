@@ -1,7 +1,7 @@
 export { getCredentials, getAccessToken, isTokenExpired } from './auth/index.js';
 export type { ClaudeCredentials, ClaudeOAuthCredentials } from './auth/index.js';
 
-export { ClaudeCodeClient } from './api/index.js';
+export { ClaudeCodeClient, OAuthApi } from './api/index.js';
 export type {
   UsageResponse,
   UsageBucket,

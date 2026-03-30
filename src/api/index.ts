@@ -1,4 +1,5 @@
 export { ClaudeCodeClient } from './client.js';
+export { OAuthApi } from './oauth.js';
 export type {
   UsageResponse,
   UsageBucket,

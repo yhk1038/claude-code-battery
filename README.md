@@ -34,11 +34,11 @@ const token = getAccessToken(credentials);
 const client = new ClaudeCodeClient(token);
 
 // 4. 사용량 조회
-const usage = await client.getUsage();
+const usage = await client.oauth.getUsage();
 console.log(usage);
 
 // 5. 프로필 정보 조회
-const profile = await client.getProfile();
+const profile = await client.oauth.getProfile();
 console.log(profile);
 ```
 
@@ -99,7 +99,7 @@ if (isTokenExpired(credentials)) {
 
 ### ClaudeCodeClient
 
-API 호출을 위한 클라이언트 클래스입니다.
+API 호출을 위한 클라이언트 클래스입니다. 서브모듈을 통해 API 엔드포인트에 접근합니다.
 
 #### `constructor(accessToken: string)`
 
@@ -109,12 +109,16 @@ API 호출을 위한 클라이언트 클래스입니다.
 const client = new ClaudeCodeClient(token);
 ```
 
-#### `getUsage(): Promise<UsageResponse>`
+#### `oauth: OAuthApi`
+
+OAuth 관련 API를 제공하는 서브모듈입니다.
+
+##### `oauth.getUsage(): Promise<UsageResponse>`
 
 사용량 정보를 조회합니다. 5시간, 7일 버킷별 이용률 정보를 반환합니다.
 
 ```typescript
-const usage = await client.getUsage();
+const usage = await client.oauth.getUsage();
 // {
 //   five_hour: { utilization: 45, resets_at: '2024-01-01T12:00:00Z' },
 //   seven_day: { utilization: 62, resets_at: '2024-01-08T00:00:00Z' },
@@ -124,12 +128,12 @@ const usage = await client.getUsage();
 // }
 ```
 
-#### `getProfile(): Promise<ProfileResponse>`
+##### `oauth.getProfile(): Promise<ProfileResponse>`
 
 계정 및 조직 프로필 정보를 조회합니다.
 
 ```typescript
-const profile = await client.getProfile();
+const profile = await client.oauth.getProfile();
 // {
 //   account: {
 //     uuid: '...',

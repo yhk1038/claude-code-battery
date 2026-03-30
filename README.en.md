@@ -34,11 +34,11 @@ const token = getAccessToken(credentials);
 const client = new ClaudeCodeClient(token);
 
 // 4. Get usage information
-const usage = await client.getUsage();
+const usage = await client.oauth.getUsage();
 console.log(usage);
 
 // 5. Get profile information
-const profile = await client.getProfile();
+const profile = await client.oauth.getProfile();
 console.log(profile);
 ```
 
@@ -99,7 +99,7 @@ if (isTokenExpired(credentials)) {
 
 ### ClaudeCodeClient
 
-A client class for making API calls.
+A client class for making API calls. Access API endpoints through sub-modules.
 
 #### `constructor(accessToken: string)`
 
@@ -109,12 +109,16 @@ Initializes the client with an access token.
 const client = new ClaudeCodeClient(token);
 ```
 
-#### `getUsage(): Promise<UsageResponse>`
+#### `oauth: OAuthApi`
+
+A sub-module that provides OAuth-related API methods.
+
+##### `oauth.getUsage(): Promise<UsageResponse>`
 
 Retrieves usage information. Returns utilization data for 5-hour and 7-day buckets.
 
 ```typescript
-const usage = await client.getUsage();
+const usage = await client.oauth.getUsage();
 // {
 //   five_hour: { utilization: 45, resets_at: '2024-01-01T12:00:00Z' },
 //   seven_day: { utilization: 62, resets_at: '2024-01-08T00:00:00Z' },
@@ -124,12 +128,12 @@ const usage = await client.getUsage();
 // }
 ```
 
-#### `getProfile(): Promise<ProfileResponse>`
+##### `oauth.getProfile(): Promise<ProfileResponse>`
 
 Retrieves account and organization profile information.
 
 ```typescript
-const profile = await client.getProfile();
+const profile = await client.oauth.getProfile();
 // {
 //   account: {
 //     uuid: '...',

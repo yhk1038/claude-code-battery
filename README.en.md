@@ -1,0 +1,347 @@
+# claude-code-battery
+
+[한국어](README.md)
+
+A TypeScript SDK and CLI package that wraps the internal API of Claude Code. This allows programmatic access to API usage metrics and account information for Claude Code users.
+
+## Important Notes
+
+- **Unofficial API**: This package uses the unofficial internal API of the Claude Code client. Anthropic does not officially support it, so it may change in the future.
+- **Claude Code Login Required**: To use this SDK, you must have Claude Code installed and logged in on your local machine.
+
+## Installation
+
+```bash
+npm install claude-code-battery
+```
+
+Node.js version 20 or higher is required.
+
+## Quick Start
+
+### SDK Usage
+
+```typescript
+import { getCredentials, getAccessToken, ClaudeCodeClient } from 'claude-code-battery';
+
+// 1. Read Claude Code credentials (automatically reads from platform-specific storage)
+const credentials = await getCredentials();
+
+// 2. Extract access token
+const token = getAccessToken(credentials);
+
+// 3. Create API client
+const client = new ClaudeCodeClient(token);
+
+// 4. Get usage information
+const usage = await client.getUsage();
+console.log(usage);
+
+// 5. Get profile information
+const profile = await client.getProfile();
+console.log(profile);
+```
+
+### CLI Usage
+
+After building, you can use the `ccb` command.
+
+```bash
+# Build
+npm run build
+
+# Install globally (optional)
+npm install -g .
+
+# Get usage information
+ccb oauth usage
+
+# Get profile information
+ccb oauth profile
+
+# Output in JSON format
+ccb oauth usage --json
+```
+
+## API Documentation
+
+### Authentication Functions
+
+#### `getCredentials(): Promise<ClaudeCredentials>`
+
+Reads credentials from the Claude Code storage.
+
+- **macOS**: Reads from Keychain
+- **Windows/Linux**: Reads from `~/.claude/.credentials.json` file
+- **Customization**: Specify path with `CLAUDE_CONFIG_DIR` environment variable
+
+```typescript
+const credentials = await getCredentials();
+```
+
+#### `getAccessToken(credentials: ClaudeCredentials): string`
+
+Extracts the access token from credentials.
+
+```typescript
+const token = getAccessToken(credentials);
+```
+
+#### `isTokenExpired(credentials: ClaudeCredentials): boolean`
+
+Checks if the token has expired.
+
+```typescript
+if (isTokenExpired(credentials)) {
+  console.log('Token has expired');
+}
+```
+
+### ClaudeCodeClient
+
+A client class for making API calls.
+
+#### `constructor(accessToken: string)`
+
+Initializes the client with an access token.
+
+```typescript
+const client = new ClaudeCodeClient(token);
+```
+
+#### `getUsage(): Promise<UsageResponse>`
+
+Retrieves usage information. Returns utilization data for 5-hour and 7-day buckets.
+
+```typescript
+const usage = await client.getUsage();
+// {
+//   five_hour: { utilization: 45, resets_at: '2024-01-01T12:00:00Z' },
+//   seven_day: { utilization: 62, resets_at: '2024-01-08T00:00:00Z' },
+//   seven_day_opus: { utilization: 30, resets_at: '2024-01-08T00:00:00Z' },
+//   seven_day_sonnet: { utilization: 55, resets_at: '2024-01-08T00:00:00Z' },
+//   extra_usage: { is_enabled: true, monthly_limit: 1000, ... }
+// }
+```
+
+#### `getProfile(): Promise<ProfileResponse>`
+
+Retrieves account and organization profile information.
+
+```typescript
+const profile = await client.getProfile();
+// {
+//   account: {
+//     uuid: '...',
+//     display_name: 'John Doe',
+//     email: 'john@example.com',
+//     has_claude_pro: true,
+//     ...
+//   },
+//   organization: {
+//     name: 'My Org',
+//     organization_type: 'free',
+//     subscription_status: 'active',
+//     ...
+//   },
+//   application: { ... }
+// }
+```
+
+## Type Definitions
+
+### UsageResponse
+
+```typescript
+interface UsageResponse {
+  five_hour: UsageBucket | null;
+  seven_day: UsageBucket | null;
+  seven_day_oauth_apps: UsageBucket | null;
+  seven_day_opus: UsageBucket | null;
+  seven_day_sonnet: UsageBucket | null;
+  seven_day_cowork: UsageBucket | null;
+  extra_usage: ExtraUsage | null;
+}
+```
+
+### UsageBucket
+
+```typescript
+interface UsageBucket {
+  utilization: number;      // 0-100%
+  resets_at: string | null; // ISO 8601 format reset time
+}
+```
+
+### ExtraUsage
+
+```typescript
+interface ExtraUsage {
+  is_enabled: boolean;
+  monthly_limit: number | null;
+  used_credits: number | null;
+  utilization: number | null;
+}
+```
+
+### ProfileResponse
+
+```typescript
+interface ProfileResponse {
+  account: AccountInfo;
+  organization: OrganizationInfo;
+  application: ApplicationInfo;
+}
+```
+
+### AccountInfo
+
+```typescript
+interface AccountInfo {
+  uuid: string;
+  full_name: string;
+  display_name: string;
+  email: string;
+  has_claude_max: boolean;
+  has_claude_pro: boolean;
+  created_at: string;
+}
+```
+
+### OrganizationInfo
+
+```typescript
+interface OrganizationInfo {
+  uuid: string;
+  name: string;
+  organization_type: string;
+  billing_type: string;
+  rate_limit_tier: string;
+  has_extra_usage_enabled: boolean;
+  subscription_status: string;
+  subscription_created_at: string;
+}
+```
+
+### ApplicationInfo
+
+```typescript
+interface ApplicationInfo {
+  uuid: string;
+  name: string;
+  slug: string;
+}
+```
+
+### ClaudeCredentials
+
+```typescript
+interface ClaudeCredentials {
+  claudeAiOauth: ClaudeOAuthCredentials;
+  organizationUuid: string;
+}
+
+interface ClaudeOAuthCredentials {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+  scopes: string[];
+  subscriptionType: string;
+  rateLimitTier: string;
+}
+```
+
+## CLI Commands
+
+### usage
+
+Retrieves usage limit information.
+
+```bash
+ccb oauth usage
+
+# Output example:
+# Usage:
+#   five hour: 45%
+#   seven day: 62% (resets 2024-01-08T00:00:00)
+#   seven day opus: 30% (resets 2024-01-08T00:00:00)
+#   seven day sonnet: 55% (resets 2024-01-08T00:00:00)
+#   extra usage: enabled
+```
+
+### profile
+
+Retrieves account and organization profile.
+
+```bash
+ccb oauth profile
+
+# Output example:
+# Profile:
+#   name: John Doe
+#   email: john@example.com
+#   plan: free
+#   org: My Organization
+#   status: active
+```
+
+### Options
+
+- `--json`: Output in JSON format
+- `-h, --help`: Show help
+- `-v, --version`: Show version information
+
+```bash
+ccb oauth usage --json
+ccb oauth profile --json
+ccb --version
+ccb --help
+```
+
+## Development
+
+### Installation
+
+```bash
+npm install
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+Compiles TypeScript to JavaScript. Output is saved in the `dist/` directory.
+
+### Watch Mode
+
+```bash
+npm run dev
+```
+
+Automatically compiles on file changes.
+
+### Type Checking
+
+```bash
+npm run lint
+```
+
+Runs TypeScript type checking.
+
+### Testing
+
+```bash
+npm test
+```
+
+Runs test files in `dist/**/*.test.js`.
+
+## License
+
+MIT
+
+## Author
+
+yhk1038

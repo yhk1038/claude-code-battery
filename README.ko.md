@@ -1,79 +1,79 @@
 # claude-code-battery
 
-[한국어](README.md)
+[English](README.md)
 
-A TypeScript SDK and CLI package that wraps the internal API of Claude Code. This allows programmatic access to API usage metrics and account information for Claude Code users.
+Claude Code의 내부 API를 래핑한 TypeScript SDK 및 CLI 패키지입니다. Claude Code 사용자의 API 사용량 및 계정 정보를 프로그래매틱하게 접근할 수 있습니다.
 
-## Important Notes
+## 주의사항
 
-- **Unofficial API**: This package uses the unofficial internal API of the Claude Code client. Anthropic does not officially support it, so it may change in the future.
-- **Claude Code Login Required**: To use this SDK, you must have Claude Code installed and logged in on your local machine.
+- **비공식 API**: 이 패키지는 Claude Code 클라이언트의 비공식 내부 API를 사용합니다. Anthropic에서 공식으로 지원하지 않으므로 향후 변경될 수 있습니다.
+- **Claude Code 로그인 필수**: 이 SDK를 사용하려면 로컬 환경에 Claude Code가 설치되어 있고 로그인되어 있어야 합니다.
 
-## Installation
+## 설치
 
 ```bash
 npm install claude-code-battery
 ```
 
-Node.js version 20 or higher is required.
+Node.js 버전 20 이상이 필요합니다.
 
-## Quick Start
+## 빠른 시작
 
-### SDK Usage
+### SDK 사용
 
 ```typescript
 import { getCredentials, getAccessToken, ClaudeCodeClient } from 'claude-code-battery';
 
-// 1. Read Claude Code credentials (automatically reads from platform-specific storage)
+// 1. Claude Code 크레덴셜 읽기 (자동으로 플랫폼에 맞는 저장소에서 읽음)
 const credentials = await getCredentials();
 
-// 2. Extract access token
+// 2. 접근 토큰 추출
 const token = getAccessToken(credentials);
 
-// 3. Create API client
+// 3. API 클라이언트 생성
 const client = new ClaudeCodeClient(token);
 
-// 4. Get usage information
+// 4. 사용량 조회
 const usage = await client.oauth.getUsage();
 console.log(usage);
 
-// 5. Get profile information
+// 5. 프로필 정보 조회
 const profile = await client.oauth.getProfile();
 console.log(profile);
 ```
 
-### CLI Usage
+### CLI 사용
 
-After building, you can use the `ccb` command.
+빌드 후 `ccb` 명령으로 사용할 수 있습니다.
 
 ```bash
-# Build
+# 빌드
 npm run build
 
-# Install globally (optional)
+# 설치 (전역으로 사용하려면)
 npm install -g .
 
-# Get usage information
+# 사용량 조회
 ccb oauth usage
 
-# Get profile information
+# 프로필 조회
 ccb oauth profile
 
-# Output in JSON format
+# JSON 형식으로 출력
 ccb oauth usage --json
 ```
 
-## API Documentation
+## API 문서
 
-### Authentication Functions
+### 인증 함수
 
 #### `getCredentials(): Promise<ClaudeCredentials>`
 
-Reads credentials from the Claude Code storage.
+Claude Code 저장소에서 크레덴셜을 읽습니다.
 
-- **macOS**: Reads from Keychain
-- **Windows/Linux**: Reads from `~/.claude/.credentials.json` file
-- **Customization**: Specify path with `CLAUDE_CONFIG_DIR` environment variable
+- **macOS**: Keychain에서 읽음
+- **Windows/Linux**: `~/.claude/.credentials.json` 파일에서 읽음
+- **커스터마이징**: `CLAUDE_CONFIG_DIR` 환경변수로 경로 지정 가능
 
 ```typescript
 const credentials = await getCredentials();
@@ -81,7 +81,7 @@ const credentials = await getCredentials();
 
 #### `getAccessToken(credentials: ClaudeCredentials): string`
 
-Extracts the access token from credentials.
+크레덴셜에서 접근 토큰을 추출합니다.
 
 ```typescript
 const token = getAccessToken(credentials);
@@ -89,7 +89,7 @@ const token = getAccessToken(credentials);
 
 #### `isTokenExpired(credentials: ClaudeCredentials): boolean`
 
-Checks if the token has expired.
+토큰이 만료되었는지 확인합니다.
 
 ```typescript
 if (isTokenExpired(credentials)) {
@@ -99,11 +99,11 @@ if (isTokenExpired(credentials)) {
 
 ### ClaudeCodeClient
 
-A client class for making API calls. Access API endpoints through sub-modules.
+API 호출을 위한 클라이언트 클래스입니다. 서브모듈을 통해 API 엔드포인트에 접근합니다.
 
 #### `constructor(accessToken: string)`
 
-Initializes the client with an access token.
+접근 토큰으로 클라이언트를 초기화합니다.
 
 ```typescript
 const client = new ClaudeCodeClient(token);
@@ -111,11 +111,11 @@ const client = new ClaudeCodeClient(token);
 
 #### `oauth: OAuthApi`
 
-A sub-module that provides OAuth-related API methods.
+OAuth 관련 API를 제공하는 서브모듈입니다.
 
 ##### `oauth.getUsage(): Promise<UsageResponse>`
 
-Retrieves usage information. Returns utilization data for 5-hour and 7-day buckets.
+사용량 정보를 조회합니다. 5시간, 7일 버킷별 이용률 정보를 반환합니다.
 
 ```typescript
 const usage = await client.oauth.getUsage();
@@ -130,7 +130,7 @@ const usage = await client.oauth.getUsage();
 
 ##### `oauth.getProfile(): Promise<ProfileResponse>`
 
-Retrieves account and organization profile information.
+계정 및 조직 프로필 정보를 조회합니다.
 
 ```typescript
 const profile = await client.oauth.getProfile();
@@ -152,7 +152,7 @@ const profile = await client.oauth.getProfile();
 // }
 ```
 
-## Type Definitions
+## 타입 정의
 
 ### UsageResponse
 
@@ -172,8 +172,8 @@ interface UsageResponse {
 
 ```typescript
 interface UsageBucket {
-  utilization: number;      // 0-100%
-  resets_at: string | null; // ISO 8601 format reset time
+  utilization: number;      // 0-100 %
+  resets_at: string | null; // ISO 8601 형식의 리셋 시간
 }
 ```
 
@@ -255,16 +255,16 @@ interface ClaudeOAuthCredentials {
 }
 ```
 
-## CLI Commands
+## CLI 명령어
 
 ### usage
 
-Retrieves usage limit information.
+사용량 제한 정보를 조회합니다.
 
 ```bash
 ccb oauth usage
 
-# Output example:
+# 출력 예:
 # Usage:
 #   five hour: 45%
 #   seven day: 62% (resets 2024-01-08T00:00:00)
@@ -275,12 +275,12 @@ ccb oauth usage
 
 ### profile
 
-Retrieves account and organization profile.
+계정 및 조직 프로필을 조회합니다.
 
 ```bash
 ccb oauth profile
 
-# Output example:
+# 출력 예:
 # Profile:
 #   name: John Doe
 #   email: john@example.com
@@ -289,11 +289,11 @@ ccb oauth profile
 #   status: active
 ```
 
-### Options
+### 옵션
 
-- `--json`: Output in JSON format
-- `-h, --help`: Show help
-- `-v, --version`: Show version information
+- `--json`: JSON 형식으로 출력
+- `-h, --help`: 도움말 표시
+- `-v, --version`: 버전 정보 표시
 
 ```bash
 ccb oauth usage --json
@@ -302,50 +302,50 @@ ccb --version
 ccb --help
 ```
 
-## Development
+## 개발
 
-### Installation
+### 설치
 
 ```bash
 npm install
 ```
 
-### Build
+### 빌드
 
 ```bash
 npm run build
 ```
 
-Compiles TypeScript to JavaScript. Output is saved in the `dist/` directory.
+TypeScript를 JavaScript로 컴파일합니다. 결과물은 `dist/` 디렉토리에 저장됩니다.
 
-### Watch Mode
+### Watch 모드
 
 ```bash
 npm run dev
 ```
 
-Automatically compiles on file changes.
+파일 변경을 감지하여 자동으로 컴파일합니다.
 
-### Type Checking
+### 타입 검사
 
 ```bash
 npm run lint
 ```
 
-Runs TypeScript type checking.
+TypeScript 타입 검사를 실행합니다.
 
-### Testing
+### 테스트
 
 ```bash
 npm test
 ```
 
-Runs test files in `dist/**/*.test.js`.
+`dist/**/*.test.js` 파일을 실행합니다.
 
-## License
+## 라이선스
 
 MIT
 
-## Author
+## 작성자
 
 yhk1038

@@ -21,6 +21,14 @@
     "cli"
   ],
   "license": "MIT",
+  "author": "yhk1038",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yhk1038/claude-code-battery.git"
+  },
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=20"
   },

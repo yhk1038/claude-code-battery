@@ -176,6 +176,34 @@ const profile = await client.oauth.getProfile();
 // }
 ```
 
+### Error Handling
+
+All errors thrown by the SDK are instances of `CcbError`, which includes a machine-readable `code` and optional `hint`.
+
+```typescript
+import { ClaudeCodeClient, CcbError } from 'claude-code-battery';
+
+try {
+  const usage = await client.oauth.getUsage();
+} catch (err) {
+  if (err instanceof CcbError) {
+    console.log(err.code);    // 'unsupported_auth'
+    console.log(err.hint);    // 'Check usage at console.anthropic.com, ...'
+    console.log(err.toJSON()); // { error: { code, message, hint } }
+  }
+}
+```
+
+#### Error Codes
+
+| Code | Description | Hint |
+|------|-------------|------|
+| `unsupported_auth` | API Key does not support this operation | Check usage at console.anthropic.com, or use OAuth login |
+| `credentials_not_found` | Credentials file not found | Run `claude login` to authenticate |
+| `token_expired` | OAuth token has expired | Run `claude login` to refresh your token |
+| `api_error` | API request failed (includes HTTP status) | — |
+| `unsupported_platform` | Platform not supported | — |
+
 ## Type Definitions
 
 ### Authentication Types
@@ -334,6 +362,27 @@ ccb oauth usage --json
 ccb oauth profile --json
 ccb --version
 ccb --help
+```
+
+### Error Output
+
+Errors respect the `--json` flag:
+
+```bash
+$ ccb oauth usage
+Error: API Key authentication does not support usage/profile queries.
+Hint: Check usage at console.anthropic.com, or use OAuth login (claude login)
+```
+
+```bash
+$ ccb oauth usage --json
+{
+  "error": {
+    "code": "unsupported_auth",
+    "message": "API Key authentication does not support usage/profile queries.",
+    "hint": "Check usage at console.anthropic.com, or use OAuth login (claude login)"
+  }
+}
 ```
 
 ## Development

@@ -176,6 +176,34 @@ const profile = await client.oauth.getProfile();
 // }
 ```
 
+### 에러 핸들링
+
+SDK에서 발생하는 모든 에러는 `CcbError` 인스턴스이며, 기계가 읽을 수 있는 `code`와 선택적인 `hint`를 포함합니다.
+
+```typescript
+import { ClaudeCodeClient, CcbError } from 'claude-code-battery';
+
+try {
+  const usage = await client.oauth.getUsage();
+} catch (err) {
+  if (err instanceof CcbError) {
+    console.log(err.code);    // 'unsupported_auth'
+    console.log(err.hint);    // 'Check usage at console.anthropic.com, ...'
+    console.log(err.toJSON()); // { error: { code, message, hint } }
+  }
+}
+```
+
+#### 에러 코드
+
+| 코드 | 설명 | 힌트 |
+|------|------|------|
+| `unsupported_auth` | API Key는 이 작업을 지원하지 않음 | console.anthropic.com에서 사용량 확인 또는 OAuth 로그인 사용 |
+| `credentials_not_found` | 크레덴셜 파일을 찾을 수 없음 | `claude login` 명령 실행으로 인증 |
+| `token_expired` | OAuth 토큰이 만료됨 | `claude login` 명령 실행으로 토큰 갱신 |
+| `api_error` | API 요청 실패 (HTTP 상태 포함) | — |
+| `unsupported_platform` | 지원하지 않는 플랫폼 | — |
+
 ## 타입 정의
 
 ### 인증 타입
@@ -334,6 +362,27 @@ ccb oauth usage --json
 ccb oauth profile --json
 ccb --version
 ccb --help
+```
+
+### 에러 출력
+
+에러 출력도 `--json` 플래그를 따릅니다:
+
+```bash
+$ ccb oauth usage
+Error: API Key authentication does not support usage/profile queries.
+Hint: Check usage at console.anthropic.com, or use OAuth login (claude login)
+```
+
+```bash
+$ ccb oauth usage --json
+{
+  "error": {
+    "code": "unsupported_auth",
+    "message": "API Key authentication does not support usage/profile queries.",
+    "hint": "Check usage at console.anthropic.com, or use OAuth login (claude login)"
+  }
+}
 ```
 
 ## 개발

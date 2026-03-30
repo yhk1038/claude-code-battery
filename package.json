@@ -1,6 +1,6 @@
 {
   "name": "claude-code-battery",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "SDK and CLI for Claude Code internal API",
   "type": "module",
   "main": "./dist/index.js",

@@ -6,7 +6,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "ccb": "./dist/cli/index.js"
+    "ccb": "dist/cli/index.js"
   },
   "scripts": {
     "build": "tsc",

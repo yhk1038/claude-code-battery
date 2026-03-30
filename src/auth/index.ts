@@ -1,4 +1,5 @@
 import { readKeychainCredentials } from './keychain.js';
+import { readFileCredentials } from './file-store.js';
 import type { ClaudeCredentials } from './types.js';
 
 export type { ClaudeCredentials, ClaudeOAuthCredentials } from './types.js';
@@ -10,8 +11,11 @@ export async function getCredentials(): Promise<ClaudeCredentials> {
     return readKeychainCredentials();
   }
 
-  // TODO: Windows / Linux 지원
-  throw new Error(`Unsupported platform: ${platform}. Currently only macOS is supported.`);
+  if (platform === 'win32' || platform === 'linux') {
+    return readFileCredentials();
+  }
+
+  throw new Error(`Unsupported platform: ${platform}.`);
 }
 
 export function getAccessToken(credentials: ClaudeCredentials): string {

@@ -22,24 +22,22 @@ Node.js 버전 20 이상이 필요합니다.
 ### SDK 사용
 
 ```typescript
-import { getCredentials, getAccessToken, ClaudeCodeClient } from 'claude-code-battery';
+import { ClaudeCodeClient } from 'claude-code-battery';
 
-// 1. Claude Code 크레덴셜 읽기 (자동으로 플랫폼에 맞는 저장소에서 읽음)
-const credentials = await getCredentials();
+// 토큰 불필요 — 첫 API 호출 시 자동으로 크레덴셜을 읽어옵니다
+const client = new ClaudeCodeClient();
 
-// 2. 접근 토큰 추출
-const token = getAccessToken(credentials);
-
-// 3. API 클라이언트 생성
-const client = new ClaudeCodeClient(token);
-
-// 4. 사용량 조회
 const usage = await client.oauth.getUsage();
 console.log(usage);
 
-// 5. 프로필 정보 조회
 const profile = await client.oauth.getProfile();
 console.log(profile);
+```
+
+토큰을 직접 전달할 수도 있습니다:
+
+```typescript
+const client = new ClaudeCodeClient(myAccessToken);
 ```
 
 ### CLI 사용

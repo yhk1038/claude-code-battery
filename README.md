@@ -22,24 +22,22 @@ Node.js version 20 or higher is required.
 ### SDK Usage
 
 ```typescript
-import { getCredentials, getAccessToken, ClaudeCodeClient } from 'claude-code-battery';
+import { ClaudeCodeClient } from 'claude-code-battery';
 
-// 1. Read Claude Code credentials (automatically reads from platform-specific storage)
-const credentials = await getCredentials();
+// No token needed — credentials are resolved automatically on first API call
+const client = new ClaudeCodeClient();
 
-// 2. Extract access token
-const token = getAccessToken(credentials);
-
-// 3. Create API client
-const client = new ClaudeCodeClient(token);
-
-// 4. Get usage information
 const usage = await client.oauth.getUsage();
 console.log(usage);
 
-// 5. Get profile information
 const profile = await client.oauth.getProfile();
 console.log(profile);
+```
+
+You can also pass a token explicitly if needed:
+
+```typescript
+const client = new ClaudeCodeClient(myAccessToken);
 ```
 
 ### CLI Usage

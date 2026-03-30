@@ -11,3 +11,9 @@ export interface ClaudeCredentials {
   claudeAiOauth: ClaudeOAuthCredentials;
   organizationUuid: string;
 }
+
+export interface ApiKeyAuth {
+  apiKey: string;
+}
+
+export type ClientAuth = string | ApiKeyAuth;

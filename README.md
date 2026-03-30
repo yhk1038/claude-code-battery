@@ -8,6 +8,7 @@ A TypeScript SDK and CLI package that wraps the internal API of Claude Code. Thi
 
 - **Unofficial API**: This package uses the unofficial internal API of the Claude Code client. Anthropic does not officially support it, so it may change in the future.
 - **Claude Code Login Required**: To use this SDK, you must have Claude Code installed and logged in on your local machine.
+- **API Key Support**: You can also authenticate using Anthropic API Key. However, some OAuth-exclusive features (`getUsage()`, `getProfile()`) are not available with API Key authentication.
 
 ## Installation
 
@@ -37,7 +38,15 @@ console.log(profile);
 You can also pass a token explicitly if needed:
 
 ```typescript
-const client = new ClaudeCodeClient(myAccessToken);
+// With OAuth access token explicitly
+const client = new ClaudeCodeClient(myOAuthAccessToken);
+```
+
+If you prefer using Anthropic API Key:
+
+```typescript
+// With Anthropic API Key
+const client = new ClaudeCodeClient({ apiKey: process.env.ANTHROPIC_API_KEY });
 ```
 
 ### CLI Usage
@@ -95,16 +104,33 @@ if (isTokenExpired(credentials)) {
 }
 ```
 
+### Authentication Methods
+
+| Method | Header | Use Case |
+|--------|--------|----------|
+| OAuth (auto) | `Authorization: Bearer {token}` | Claude Code logged-in users |
+| OAuth (explicit) | `Authorization: Bearer {token}` | Manual OAuth token |
+| API Key | `x-api-key: {key}` | Anthropic API users |
+
+**Note**: OAuth-exclusive features (`getUsage()`, `getProfile()`) are not available with API Key authentication.
+
 ### ClaudeCodeClient
 
 A client class for making API calls. Access API endpoints through sub-modules.
 
-#### `constructor(accessToken: string)`
+#### `constructor(auth?: string | { apiKey: string })`
 
-Initializes the client with an access token.
+Initializes the client with OAuth access token or API Key. If no argument is provided, credentials are resolved automatically.
 
 ```typescript
-const client = new ClaudeCodeClient(token);
+// Auto-resolve credentials
+const client = new ClaudeCodeClient();
+
+// Explicit OAuth token
+const client = new ClaudeCodeClient(myAccessToken);
+
+// API Key
+const client = new ClaudeCodeClient({ apiKey: process.env.ANTHROPIC_API_KEY });
 ```
 
 #### `oauth: OAuthApi`
@@ -151,6 +177,16 @@ const profile = await client.oauth.getProfile();
 ```
 
 ## Type Definitions
+
+### Authentication Types
+
+```typescript
+interface ApiKeyAuth {
+  apiKey: string;
+}
+
+type ClientAuth = string | ApiKeyAuth;
+```
 
 ### UsageResponse
 

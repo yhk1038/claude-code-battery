@@ -1,8 +1,13 @@
 import { readKeychainCredentials } from './keychain.js';
 import { readFileCredentials } from './file-store.js';
-import type { ClaudeCredentials } from './types.js';
+import type { ClaudeCredentials, ClientAuth, ApiKeyAuth } from './types.js';
+import { CcbError } from '../errors.js';
 
-export type { ClaudeCredentials, ClaudeOAuthCredentials } from './types.js';
+export type { ClaudeCredentials, ClaudeOAuthCredentials, ApiKeyAuth, ClientAuth } from './types.js';
+
+export function isApiKeyAuth(auth: ClientAuth): auth is ApiKeyAuth {
+  return typeof auth === 'object' && 'apiKey' in auth;
+}
 
 export async function getCredentials(): Promise<ClaudeCredentials> {
   const platform = process.platform;
@@ -15,7 +20,7 @@ export async function getCredentials(): Promise<ClaudeCredentials> {
     return readFileCredentials();
   }
 
-  throw new Error(`Unsupported platform: ${platform}.`);
+  throw new CcbError(`Unsupported platform: ${platform}.`, 'unsupported_platform');
 }
 
 export function getAccessToken(credentials: ClaudeCredentials): string {

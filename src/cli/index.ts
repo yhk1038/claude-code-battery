@@ -3,6 +3,7 @@
 import { getCredentials, getAccessToken } from '../auth/index.js';
 import { ClaudeCodeClient } from '../api/index.js';
 import { oauthCommand } from './oauth.js';
+import { CcbError } from '../errors.js';
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -60,6 +61,26 @@ Options:
 }
 
 run().catch((err) => {
-  console.error(err instanceof Error ? err.message : String(err));
+  if (jsonOutput) {
+    if (err instanceof CcbError) {
+      console.error(JSON.stringify(err.toJSON(), null, 2));
+    } else {
+      console.error(JSON.stringify({
+        error: {
+          code: 'unknown_error',
+          message: err instanceof Error ? err.message : String(err),
+        },
+      }, null, 2));
+    }
+  } else {
+    if (err instanceof CcbError) {
+      console.error(`Error: ${err.message}`);
+      if (err.hint) {
+        console.error(`Hint: ${err.hint}`);
+      }
+    } else {
+      console.error(err instanceof Error ? err.message : String(err));
+    }
+  }
   process.exit(1);
 });

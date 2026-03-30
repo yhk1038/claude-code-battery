@@ -1,14 +1,24 @@
 import { OAuthApi } from './oauth.js';
-import { getCredentials, getAccessToken } from '../auth/index.js';
+import { getCredentials, getAccessToken, isApiKeyAuth } from '../auth/index.js';
+import type { ClientAuth } from '../auth/index.js';
+import { CcbError } from '../errors.js';
 
 const BASE_URL = 'https://api.anthropic.com';
 
 export class ClaudeCodeClient {
+  private auth?: ClientAuth;
   private accessToken?: string;
   private _oauth?: OAuthApi;
 
-  constructor(accessToken?: string) {
-    this.accessToken = accessToken;
+  constructor(auth?: ClientAuth) {
+    this.auth = auth;
+    if (typeof auth === 'string') {
+      this.accessToken = auth;
+    }
+  }
+
+  get isApiKeyMode(): boolean {
+    return isApiKeyAuth(this.auth as ClientAuth);
   }
 
   get oauth(): OAuthApi {
@@ -24,17 +34,29 @@ export class ClaudeCodeClient {
   }
 
   async _request<T>(path: string, headers?: Record<string, string>): Promise<T> {
-    const token = await this.resolveToken();
-    const response = await fetch(`${BASE_URL}${path}`, {
-      method: 'GET',
-      headers: {
+    let requestHeaders: Record<string, string>;
+
+    if (this.auth !== undefined && isApiKeyAuth(this.auth)) {
+      requestHeaders = {
+        'x-api-key': this.auth.apiKey,
+        'anthropic-version': '2023-06-01',
+        ...headers,
+      };
+    } else {
+      const token = await this.resolveToken();
+      requestHeaders = {
         Authorization: `Bearer ${token}`,
         ...headers,
-      },
+      };
+    }
+
+    const response = await fetch(`${BASE_URL}${path}`, {
+      method: 'GET',
+      headers: requestHeaders,
     });
 
     if (!response.ok) {
-      throw new Error(`API error ${response.status}: ${response.statusText}`);
+      throw new CcbError(`API error ${response.status}: ${response.statusText}`, 'api_error');
     }
 
     return response.json() as Promise<T>;

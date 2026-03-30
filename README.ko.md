@@ -8,6 +8,7 @@ Claude Code의 내부 API를 래핑한 TypeScript SDK 및 CLI 패키지입니다
 
 - **비공식 API**: 이 패키지는 Claude Code 클라이언트의 비공식 내부 API를 사용합니다. Anthropic에서 공식으로 지원하지 않으므로 향후 변경될 수 있습니다.
 - **Claude Code 로그인 필수**: 이 SDK를 사용하려면 로컬 환경에 Claude Code가 설치되어 있고 로그인되어 있어야 합니다.
+- **API Key 지원**: Anthropic API Key를 사용한 인증도 가능합니다. 다만 OAuth 전용 기능(`getUsage()`, `getProfile()`)은 API Key로는 사용할 수 없습니다.
 
 ## 설치
 
@@ -37,7 +38,15 @@ console.log(profile);
 토큰을 직접 전달할 수도 있습니다:
 
 ```typescript
-const client = new ClaudeCodeClient(myAccessToken);
+// OAuth 접근 토큰 명시
+const client = new ClaudeCodeClient(myOAuthAccessToken);
+```
+
+Anthropic API Key를 사용하려면:
+
+```typescript
+// Anthropic API Key 사용
+const client = new ClaudeCodeClient({ apiKey: process.env.ANTHROPIC_API_KEY });
 ```
 
 ### CLI 사용
@@ -95,16 +104,33 @@ if (isTokenExpired(credentials)) {
 }
 ```
 
+### 인증 방식
+
+| 방식 | 헤더 | 사용 사례 |
+|------|------|----------|
+| OAuth (자동) | `Authorization: Bearer {token}` | Claude Code 로그인 사용자 |
+| OAuth (명시) | `Authorization: Bearer {token}` | 수동 OAuth 토큰 |
+| API Key | `x-api-key: {key}` | Anthropic API 사용자 |
+
+**참고**: OAuth 전용 기능(`getUsage()`, `getProfile()`)은 API Key 인증으로는 사용할 수 없습니다.
+
 ### ClaudeCodeClient
 
 API 호출을 위한 클라이언트 클래스입니다. 서브모듈을 통해 API 엔드포인트에 접근합니다.
 
-#### `constructor(accessToken: string)`
+#### `constructor(auth?: string | { apiKey: string })`
 
-접근 토큰으로 클라이언트를 초기화합니다.
+OAuth 접근 토큰이나 API Key로 클라이언트를 초기화합니다. 인수를 전달하지 않으면 자동으로 크레덴셜을 읽어옵니다.
 
 ```typescript
-const client = new ClaudeCodeClient(token);
+// 자동으로 크레덴셜 읽어오기
+const client = new ClaudeCodeClient();
+
+// OAuth 토큰 명시
+const client = new ClaudeCodeClient(myOAuthAccessToken);
+
+// API Key
+const client = new ClaudeCodeClient({ apiKey: process.env.ANTHROPIC_API_KEY });
 ```
 
 #### `oauth: OAuthApi`
@@ -151,6 +177,16 @@ const profile = await client.oauth.getProfile();
 ```
 
 ## 타입 정의
+
+### 인증 타입
+
+```typescript
+interface ApiKeyAuth {
+  apiKey: string;
+}
+
+type ClientAuth = string | ApiKeyAuth;
+```
 
 ### UsageResponse
 
